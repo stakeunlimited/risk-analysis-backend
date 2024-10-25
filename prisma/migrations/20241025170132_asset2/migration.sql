@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Asset" ALTER COLUMN "marketCapUSD" SET DATA TYPE BIGINT;

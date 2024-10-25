@@ -1,0 +1,95 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "eslint.validate": ["javascript", "typescript"],
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+    },
+    "editor.formatOnSave": true,
+    "eslint.format.enable": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.fontLigatures": true,
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "yarn.lock": true,
+    },
+    "search.exclude": {
+      "**/lib": true,
+    },
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/examples/*/lib/**": true,
+      "**/challenges/*/lib/**": true,
+    },
+    "better-comments.tags": [
+      {
+        "tag": "TODO",
+        "color": "#FFA500",
+        "strikethrough": false,
+      },
+      {
+        "tag": "🚨",
+        "color": "#FF0000",
+        "strikethrough": false,
+      },
+      {
+        "tag": "✅",
+        "color": "#00FF00",
+        "strikethrough": false,
+      },
+      {
+        "tag": "💡",
+        "color": "#FFFF00",
+        "strikethrough": false,
+      },
+      {
+        "tag": "‣",
+        "color": "#00FFFF",
+        "backgroundColor": "#333333",
+        "strikethrough": false,
+      },
+      {
+        "tag": "(",
+        "color": "#FFFF00",
+        "strikethrough": false,
+      },
+      {
+        "tag": "-",
+        "color": "#FFFF00",
+        "strikethrough": false,
+      },
+      {
+        "tag": "==",
+        "backgroundColor": "#FFFFFF",
+        "color": "#000000",
+        "strikethrough": false,
+      },
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "code-runner.executorMap": {
+      "javascript": "node",
+      "typescript": "node_modules/.bin/ts-node",
+    },
+    "[makefile]": {
+      "editor.insertSpaces": false,
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+  },
+  "extensions": {
+    "recommendations": [
+      "aaron-bond.better-comments",
+      "dbaeumer.vscode-eslint",
+      "formulahendry.code-runner",
+    ],
+  },
+}
