@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RiskModule } from './risk/risk.module';
 
 @Module({
-  imports: [AssetModule, ConfigModule.forRoot(), RiskModule],
+  imports: [AssetModule, RiskModule, ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })

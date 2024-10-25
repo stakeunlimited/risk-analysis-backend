@@ -25,6 +25,7 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/serve-static": "^4.0.2",
     "@prisma/client": "5.21.1",
     "axios": "^1.7.7",
     "csv-parser": "^3.0.0",
