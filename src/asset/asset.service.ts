@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from '../../prisma/prisma.service';
+import * as fs from 'fs';
+import * as csv from 'csv-parser';
 
 @Injectable()
 export class AssetService {
@@ -22,6 +24,19 @@ export class AssetService {
     return data.data;
   }
 
+  async getChainsData() {
+    const data = await axios.get(
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest',
+      //   'https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?symbol=ETH,BSC,SOL,AVAX,MATIC,FTM,DOT,ADA,ALGO,CELO,ARB',
+      {
+        headers: {
+          'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY,
+        },
+      },
+    );
+    return data.data;
+  }
+
   async getTokenInfo(id: string) {
     const data = await axios.get(
       `https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${id}`,
@@ -34,40 +49,93 @@ export class AssetService {
     return data.data;
   }
 
-  async execute() {
-    const data = [
-      {
-        name: 'Tether USDt',
-        symbol: 'USDT',
-        marketCapUSD: 120258305917,
-        dateLaunched: new Date('2014-10-06T00:00:00.000Z'),
-      },
-      {
-        name: 'USDC',
-        symbol: 'USDC',
-        marketCapUSD: 34424178344,
-        dateLaunched: new Date('2018-09-26T00:00:00.000Z'),
-      },
-      {
-        name: 'Dai',
-        symbol: 'DAI',
-        marketCapUSD: 5364769716,
-        dateLaunched: new Date('2017-12-18T00:00:00.000Z'),
-      },
-      {
-        name: 'First Digital USD',
-        symbol: 'FDUSD',
-        marketCapUSD: 2626066119,
-        dateLaunched: new Date('2020-05-01T00:00:00.000Z'),
-      },
-      {
-        name: 'USDD',
-        symbol: 'USDD',
-        marketCapUSD: 757687642,
-        dateLaunched: new Date('2020-08-18T00:00:00.000Z'),
-      },
-    ];
+  async loadPoolsFromCSV(filePath: string) {
+    const pools = [];
 
-    await this.prisma.asset.createMany({ data });
+    return new Promise<void>((resolve, reject) => {
+      fs.createReadStream(filePath)
+        .pipe(csv())
+        .on('data', (row) => {
+          pools.push(row);
+        })
+        .on('end', async () => {
+          await this.processPoolsData(pools);
+          resolve();
+        })
+        .on('error', (error) => reject(error));
+    });
+  }
+
+  async processPoolsData(pools: any[]) {
+    for (const pool of pools) {
+      const chain = await this.prisma.chain.upsert({
+        where: { symbol: pool.chainSymbol }, // Ensure symbol is unique
+        update: {},
+        create: {
+          name: pool.chain,
+          symbol: pool.chainSymbol,
+        },
+      });
+
+      const platform = await this.prisma.platform.upsert({
+        where: { name: pool.name }, // Use id or a unique identifier
+        update: {},
+        create: {
+          name: pool.protocolVersion,
+          chainId: chain.id,
+          tvlUSD: BigInt(pool.totalLiquidity_value),
+        },
+      });
+
+      const poolData = await this.prisma.pool.upsert({
+        where: { address: pool.id },
+        update: {},
+        create: {
+          name: `${pool.token0_symbol}-${pool.token1_symbol}`,
+          address: pool.id,
+          tvlUSD: BigInt(pool.totalLiquidity_value),
+          platformId: platform.id,
+        },
+      });
+
+      const asset0 = await this.prisma.asset.upsert({
+        where: { symbol: pool.token0_symbol },
+        update: {},
+        create: {
+          name: pool.token0_name,
+          symbol: pool.token0_symbol,
+          marketCapUSD: BigInt(pool.token0_fullyDilutedValuation_value),
+        },
+      });
+
+      const asset1 = await this.prisma.asset.upsert({
+        where: { symbol: pool.token1_symbol },
+        update: {},
+        create: {
+          name: pool.token1_name,
+          symbol: pool.token1_symbol,
+          marketCapUSD: BigInt(pool.token1_fullyDilutedValuation_value),
+        },
+      });
+
+      await this.prisma.assetOnPool.create({
+        data: {
+          poolId: poolData.id,
+          assetId: asset0.id,
+        },
+      });
+
+      await this.prisma.assetOnPool.create({
+        data: {
+          poolId: poolData.id,
+          assetId: asset1.id,
+        },
+      });
+    }
+  }
+
+  async execute() {
+    const data = [];
+    await this.prisma.chain.createMany({ data });
   }
 }

@@ -7,11 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Chain {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  name         String   @unique @db.VarChar(255)
+  symbol       String   @unique @db.VarChar(10)
+  dateLaunched DateTime?
+  marketCapUSD       BigInt?
+  createdAt    DateTime @default(now())
+  Platform     Platform[]
+}
+
+model Platform {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  name         String   @unique @db.VarChar(255)
+  tvlUSD       BigInt?
+  dateLaunched DateTime?
+  chain        Chain    @relation(fields: [chainId], references: [id])
+  chainId      String   @db.VarChar(36)
+  createdAt    DateTime @default(now())
+  Pool         Pool[]
+}
+
+model Pool {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  name        String?    @db.VarChar(255)
+  address      String?  @unique @db.VarChar(42)
+  tvlUSD       BigInt?
+  dateLaunched DateTime?
+  platform     Platform    @relation(fields: [platformId], references: [id])
+  platformId   String   @db.VarChar(36)
+  createdAt    DateTime @default(now())
+  assets       AssetOnPool[]
+}
+
 model Asset {
   id           String   @id @default(uuid()) @db.VarChar(36)
   name         String   @db.VarChar(255)
-  symbol       String   @db.VarChar(10)
-  marketCapUSD BigInt
-  dateLaunched DateTime
+  symbol       String   @unique @db.VarChar(10)
+  marketCapUSD BigInt?
+  dateLaunched DateTime?
   createdAt    DateTime @default(now())
+  pools        AssetOnPool[]
+}
+
+model AssetOnPool {
+  pool       Pool    @relation(fields: [poolId], references: [id])
+  poolId     String  @db.VarChar(36)
+  asset      Asset   @relation(fields: [assetId], references: [id])
+  assetId    String  @db.VarChar(36)
+
+  createdAt  DateTime @default(now())
+
+  @@id([poolId, assetId])
 }

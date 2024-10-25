@@ -4,13 +4,18 @@ import { AssetService } from './asset.service';
 export class AssetController {
   constructor(private readonly assetService: AssetService) {}
 
-  @Post('execute')
-  async execute() {
-    return this.assetService.execute();
-  }
-
   @Get()
   async getAllTokensData() {
     return this.assetService.getAllTokensData();
+  }
+
+  @Get('chains')
+  async getChainsData() {
+    return this.assetService.getChainsData();
+  }
+
+  @Post('execute')
+  async execute() {
+    return this.assetService.execute();
   }
 }
