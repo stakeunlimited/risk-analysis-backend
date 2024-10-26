@@ -6,6 +6,59 @@ import { Asset, Chain, Platform, Pool } from '@prisma/client';
 export class RiskService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getTotalPoolRisk(poolAddress: string) {
+    // Find the pool by its unique address
+    const pool = await this.prisma.pool.findUnique({
+      where: { address: poolAddress },
+    });
+    if (!pool) throw new Error('Pool not found');
+
+    const platform = await this.prisma.platform.findUnique({
+      where: { id: pool.platformId },
+      include: { chain: true },
+    });
+
+    // Retrieve risks for chain, protocol, and pool
+    const chainRisk = (await this.getChainsRisk()).find(
+      (chain) => chain.id === platform.chain.id,
+    ).risks.total;
+    const protocolRisk = (await this.getProtocolsRisk()).find(
+      (protocol) => protocol.id === pool.platformId,
+    ).risks.total;
+    const poolRisk = (await this.getPoolsRisk()).find(
+      (p) => p.address === poolAddress,
+    ).risks.total;
+
+    const poolAssets = await this.prisma.assetOnPool.findMany({
+      where: { poolId: pool.id },
+      include: { asset: true },
+    });
+
+    // Calculate the average risk of assets associated with the pool
+    const assetRisks = (await this.getAssetsRisk())
+      .filter((assetRisk) =>
+        poolAssets.some((pa) => pa.assetId === assetRisk.id),
+      )
+      .map((assetRisk) => assetRisk.risks.total);
+    const avgAssetRisk = assetRisks.length
+      ? assetRisks.reduce((sum, risk) => sum + risk, 0) / assetRisks.length
+      : 0;
+
+    // Define weights for the total risk calculation
+    const weights = { chain: 0.25, protocol: 0.25, pool: 0.3, assets: 0.2 };
+
+    const totalRisk =
+      chainRisk * weights.chain +
+      protocolRisk * weights.protocol +
+      poolRisk * weights.pool +
+      avgAssetRisk * weights.assets;
+
+    return {
+      poolAddress,
+      risks: { chainRisk, protocolRisk, poolRisk, avgAssetRisk, totalRisk },
+    };
+  }
+
   ////////////////
   // CHAIN RISK //
   ////////////////
