@@ -1,0 +1,83 @@
+{
+  "scores": [
+    {
+      "focus_area": "Smart Contract Vulnerabilities",
+      "importance": "High",
+      "score": 4,
+      "description": "The audit identified no critical vulnerabilities but noted some moderate issues that were adequately addressed, reflecting a strong security posture against typical smart contract vulnerabilities."
+    },
+    {
+      "focus_area": "Privileged Roles & Permissions",
+      "importance": "High",
+      "score": 4,
+      "description": "The areas related to privileged roles were well-defined with clear boundaries, though some improvements were suggested to further minimize risks."
+    },
+    {
+      "focus_area": "External Dependencies",
+      "importance": "High",
+      "score": 3,
+      "description": "The contract relies on several external protocols which were audited, but cross-contract interactions were noted as a potential risk area."
+    },
+    {
+      "focus_area": "Testing Coverage",
+      "importance": "High",
+      "score": 5,
+      "description": "Extensive testing was reported with high coverage, encompassing both unit and integration tests, indicating thorough vetting of the code."
+    },
+    {
+      "focus_area": "Formal Verification",
+      "importance": "High",
+      "score": 2,
+      "description": "There was no evidence of formal verification in the audit, which is becoming more standard in DeFi for ensuring rigorous security guarantees."
+    },
+    {
+      "focus_area": "Economic Security",
+      "importance": "High",
+      "score": 4,
+      "description": "Security measures against economic attacks were satisfactory, though recommendations were given to strengthen protections further."
+    },
+    {
+      "focus_area": "Bug Bounty Program",
+      "importance": "Medium",
+      "score": 3,
+      "description": "A bug bounty program is in place but could be better promoted to attract higher participation from security researchers."
+    },
+    {
+      "focus_area": "Gas Optimization",
+      "importance": "Medium",
+      "score": 4,
+      "description": "The audit noted several optimizations that were implemented, reducing transaction costs and increasing efficiency."
+    },
+    {
+      "focus_area": "Immutable Contracts",
+      "importance": "Medium",
+      "score": 3,
+      "description": "Some contracts were upgradeable, providing flexibility, though it presents challenges in ensuring static security."
+    },
+    {
+      "focus_area": "Auditor Reputation",
+      "importance": "Medium",
+      "score": 5,
+      "description": "Paladin Security has established a strong reputation in the industry, offering credible and reliable audit services."
+    },
+    {
+      "focus_area": "Audit Recency",
+      "importance": "Medium",
+      "score": 5,
+      "description": "The audit is recent and reflects compliance with the latest standards and code implementations as of early 2023."
+    },
+    {
+      "focus_area": "Code Readability & Documentation",
+      "importance": "Low",
+      "score": 3,
+      "description": "Documentation was adequate but could benefit from enhanced clarity and detail for easier comprehension by third parties."
+    },
+    {
+      "focus_area": "Non-Technical Risks",
+      "importance": "Low",
+      "score": 3,
+      "description": "Non-technical risks were acknowledged, including team reputation and regulatory risks, though without in-depth analysis."
+    }
+  ],
+  "weighted_average_score": 3.6923076923076925
+}
