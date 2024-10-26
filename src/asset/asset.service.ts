@@ -6,11 +6,30 @@ import * as csv from 'csv-parser';
 
 @Injectable()
 export class AssetService {
-  //   async findAll(): Promise<Asset[]> {
-  //     return this.assetModel.find().exec();
-  //   }
-
   constructor(private readonly prisma: PrismaService) {}
+
+  async getVolatilityData(symbol: string) {
+    if (!symbol) {
+      throw new Error('Symbol is required');
+    }
+
+    const data = await this.prisma.volatilityData.findMany({
+      where: {
+        asset: {
+          symbol,
+        },
+      },
+    });
+
+    return data.map((d) => ({
+      date: d.date,
+      volatilityInPercent: d.volatility.mul(100).toString(),
+    }));
+  }
+
+  //////////////////////
+  // EXPERIMENTS ZONE //
+  //////////////////////
 
   async getAllTokensData() {
     const data = await axios.get(

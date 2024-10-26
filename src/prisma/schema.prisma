@@ -49,6 +49,7 @@ model Asset {
   createdAt    DateTime @default(now())
   pools        AssetOnPool[]
   priceData    PriceData[]
+  volatilityData VolatilityData[]
 }
 
 model AssetOnPool {
@@ -69,4 +70,19 @@ model PriceData {
   asset        Asset   @relation(fields: [assetId], references: [id])
   assetId      String  @db.VarChar(36)
   createdAt    DateTime @default(now())
+}
+
+model VolatilityData {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  asset      Asset    @relation(fields: [assetId], references: [id])
+  assetId    String   @db.VarChar(36)
+  symbol     String   @db.VarChar(10)
+  date       DateTime @db.Date
+  open       Decimal
+  high       Decimal
+  low        Decimal
+  close      Decimal
+  volatility Decimal
+  kurtosis   Decimal?
+  createdAt  DateTime @default(now())
 }
