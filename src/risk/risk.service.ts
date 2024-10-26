@@ -282,9 +282,9 @@ export class RiskService {
     console.log({ volatilityRisk: volatilityRisk.map((vr) => vr) });
 
     const weights = {
-      maturity: 0.2,
+      maturity: 0.3,
       marketCap: 0.4,
-      volatilityRisk: 0.4,
+      volatilityRisk: 0.3,
     };
 
     return maturityRisk.map((mr, i) => ({
@@ -361,15 +361,17 @@ export class RiskService {
       }));
 
       const downscaledScores = this.assetService.expDownscale(scores);
+      // console.log({ downscaledScores, asset: asset.symbol });
 
       const avgScore =
         downscaledScores.reduce(
           (sum, { downscaledScore }) => sum + downscaledScore,
           0,
         ) / downscaledScores.length;
+      console.log({ avgScore, asset: asset.symbol });
 
       // Scale the average score to a risk level (1.0 - 5.0)
-      const risk = Math.min(5, Math.max(1, avgScore * 5));
+      const risk = Math.min(5, Math.max(1, avgScore * 10 * 5));
       risks.push(risk);
     }
 

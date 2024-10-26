@@ -73,7 +73,6 @@ model PriceData {
 }
 
 model VolatilityData {
-  id         String   @id @default(uuid()) @db.VarChar(36)
   asset      Asset    @relation(fields: [assetId], references: [id])
   assetId    String   @db.VarChar(36)
   symbol     String   @db.VarChar(10)
@@ -85,4 +84,6 @@ model VolatilityData {
   volatility Decimal
   kurtosis   Decimal?
   createdAt  DateTime @default(now())
+
+  @@id([assetId, date])
 }

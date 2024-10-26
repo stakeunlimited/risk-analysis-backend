@@ -33,7 +33,7 @@ export class AssetService {
   expDownscale(scores: { date: Date; score: number }[]) {
     // setup
     const maxTimeframe = 365; // Max timeframe (e.g., 365 days)
-    const alpha = Math.log(2) / (maxTimeframe / 2); // Halves every maxTimeframe/2 days
+    const alpha = 0.01; // Math.log(2) / (maxTimeframe / 2); // Halves every maxTimeframe/2 days
 
     // Downscale scores
     const today = new Date();
@@ -42,6 +42,7 @@ export class AssetService {
       const daysOld = Math.floor(
         (today.getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24),
       );
+      // const weight = 1 - daysOld / 365; // Math.exp(-alpha * daysOld);
       const weight = Math.exp(-alpha * daysOld);
       return {
         date,
