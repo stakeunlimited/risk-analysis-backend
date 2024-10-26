@@ -48,6 +48,7 @@ model Asset {
   dateLaunched DateTime?
   createdAt    DateTime @default(now())
   pools        AssetOnPool[]
+  priceData    PriceData[]
 }
 
 model AssetOnPool {
@@ -59,4 +60,13 @@ model AssetOnPool {
   createdAt  DateTime @default(now())
 
   @@id([poolId, assetId])
+}
+
+model PriceData {
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  priceUSD     Float
+  priceDate    DateTime
+  asset        Asset   @relation(fields: [assetId], references: [id])
+  assetId      String  @db.VarChar(36)
+  createdAt    DateTime @default(now())
 }
