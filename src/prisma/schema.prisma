@@ -82,6 +82,7 @@ model VolatilityData {
   low        Decimal
   close      Decimal
   volatility Decimal
+  mse        Decimal? // Mean Squared Error
   kurtosis   Decimal?
   createdAt  DateTime @default(now())
 
