@@ -9,4 +9,9 @@ export class RiskController {
   async getAssetsRisk() {
     return this.riskService.getAssetsRisk();
   }
+
+  @Get('pools')
+  async getPoolsRisk() {
+    return this.riskService.getPoolsRisk();
+  }
 }
