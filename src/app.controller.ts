@@ -7,6 +7,11 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    return this.appService.getApiInfo();
+  }
+
+  @Get('pools')
+  async getAllPools() {
+    return this.appService.getAllPools();
   }
 }
