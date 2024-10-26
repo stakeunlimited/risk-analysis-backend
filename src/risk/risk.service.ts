@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Asset, Chain, Platform, Pool } from '@prisma/client';
+import { AssetService } from '../asset/asset.service';
 
 @Injectable()
 export class RiskService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly assetService: AssetService,
+  ) {}
 
   async getTotalPoolRisk(poolAddress: string) {
     // Find the pool by its unique address
@@ -274,10 +278,13 @@ export class RiskService {
     console.log({ maturityRisk: maturityRisk.map((mr) => mr.risk) });
     const marketCapRisk = this.marketCapRiskAssets(assets);
     console.log({ marketCapRisk: marketCapRisk.map((mc) => mc.risk) });
+    const volatilityRisk = await this.volatilityRiskAssets(assets);
+    console.log({ volatilityRisk: volatilityRisk.map((vr) => vr) });
 
     const weights = {
-      maturity: 0.55,
-      marketCap: 0.45,
+      maturity: 0.2,
+      marketCap: 0.4,
+      volatilityRisk: 0.4,
     };
 
     return maturityRisk.map((mr, i) => ({
@@ -286,10 +293,12 @@ export class RiskService {
       risks: {
         maturity: mr.risk,
         marketCap: marketCapRisk[i].risk,
+        volatility: volatilityRisk[i],
         total:
           (mr.risk * weights.maturity +
-            marketCapRisk[i].risk * weights.marketCap) /
-          (weights.maturity + weights.marketCap),
+            marketCapRisk[i].risk * weights.marketCap +
+            volatilityRisk[i] * weights.volatilityRisk) /
+          (weights.maturity + weights.marketCap + weights.volatilityRisk),
       },
     }));
   }
@@ -330,5 +339,40 @@ export class RiskService {
       else if (asset.marketCapUSD < 10000000000) return { ...asset, risk: 2 };
       else return { ...asset, risk: 1 };
     });
+  }
+
+  private async volatilityRiskAssets(assets: Asset[]) {
+    const risks = [];
+    for await (const asset of assets) {
+      const data = await this.prisma.volatilityData.findMany({
+        where: {
+          asset: {
+            symbol: asset.symbol,
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+
+      const scores = data.map((d) => ({
+        date: d.date,
+        score: d.volatility.toNumber(),
+      }));
+
+      const downscaledScores = this.assetService.expDownscale(scores);
+
+      const avgScore =
+        downscaledScores.reduce(
+          (sum, { downscaledScore }) => sum + downscaledScore,
+          0,
+        ) / downscaledScores.length;
+
+      // Scale the average score to a risk level (1.0 - 5.0)
+      const risk = Math.min(5, Math.max(1, avgScore * 5));
+      risks.push(risk);
+    }
+
+    return risks;
   }
 }

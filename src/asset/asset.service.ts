@@ -3,6 +3,7 @@ import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as csv from 'csv-parser';
+import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class AssetService {
@@ -19,12 +20,35 @@ export class AssetService {
           symbol,
         },
       },
+      orderBy: {
+        date: 'desc',
+      },
     });
 
-    return data.map((d) => ({
-      date: d.date,
-      volatilityInPercent: d.volatility.mul(100).toString(),
-    }));
+    return this.expDownscale(
+      data.map((d) => ({ date: d.date, score: d.volatility.toNumber() })),
+    );
+  }
+
+  expDownscale(scores: { date: Date; score: number }[]) {
+    // setup
+    const maxTimeframe = 365; // Max timeframe (e.g., 365 days)
+    const alpha = Math.log(2) / (maxTimeframe / 2); // Halves every maxTimeframe/2 days
+
+    // Downscale scores
+    const today = new Date();
+
+    return scores.map(({ date, score }) => {
+      const daysOld = Math.floor(
+        (today.getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const weight = Math.exp(-alpha * daysOld);
+      return {
+        date,
+        originalScore: score,
+        downscaledScore: score * weight,
+      };
+    });
   }
 
   //////////////////////
